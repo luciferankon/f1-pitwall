@@ -5,37 +5,46 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(request: NextRequest) {
   try {
-    const { race, winner, context } = await request.json()
+    const { race, winner, context, results } = await request.json()
     if (!race) return NextResponse.json({ error: 'No race provided' }, { status: 400 })
 
-    const prompt = `You are an expert F1 analyst with deep knowledge of the 2024 Formula 1 season.
+    const topResults = results
+      ? results.slice(0, 10).map((r: { position: string; Driver: { code: string }; Constructor: { name: string }; Time?: { time: string }; status: string; points: string }, i: number) =>
+          `P${i + 1}: ${r.Driver.code} (${r.Constructor.name}) — ${r.Time?.time ?? r.status} — ${r.points}pts`
+        ).join('\n')
+      : 'Race result data not available'
 
-Analyze the ${race} from the 2024 F1 season.
+    const prompt = `You are an expert F1 analyst with deep knowledge of every Formula 1 season.
+
+Race: ${race}
 Winner: ${winner}
-Additional context: ${context || 'General race analysis'}
+Context: ${context || ''}
 
-Write a punchy, expert race analysis covering:
+Top 10 Results:
+${topResults}
+
+Write a punchy, expert race analysis:
 
 KEY MOMENT:
-[The single defining moment of the race — be specific and dramatic]
+[The single defining moment — specific and dramatic]
 
 STRATEGY:
-[Pit stop strategies that won or lost the race — technical but accessible]
+[Pit stop strategies that won or lost the race]
 
 PERFORMANCE:
-[Standout driver performances beyond the winner — who impressed, who disappointed]
+[Standout performances beyond the winner — who shone, who disappointed]
 
 CHAMPIONSHIP IMPACT:
-[How this result shifted the title fight — be specific about points gaps]
+[How this shifted the title fight — specific points gaps]
 
 VERDICT:
-[One sharp sentence summing up what this race meant for the season]
+[One sharp sentence summing up what this race meant]
 
-Write like Martin Brundle's grid walk — direct, opinionated, technically sharp. No filler.`
+Write like Martin Brundle — direct, opinionated, technically sharp. No filler.`
 
     const stream = anthropic.messages.stream({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 800,
+      max_tokens: 900,
       messages: [{ role: 'user', content: prompt }],
     })
 

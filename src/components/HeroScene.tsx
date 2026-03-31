@@ -7,343 +7,343 @@ interface HeroSceneProps {
   teamColor?: string
 }
 
-function buildF1Car(color: string): THREE.Group {
-  const group = new THREE.Group()
-
-  const teamMat = new THREE.MeshStandardMaterial({ color, metalness: 0.85, roughness: 0.15 })
-  const carbonMat = new THREE.MeshStandardMaterial({ color: '#111111', metalness: 0.4, roughness: 0.5 })
-  const tireMat = new THREE.MeshStandardMaterial({ color: '#1a1a1a', metalness: 0.1, roughness: 0.9 })
-  const rimMat = new THREE.MeshStandardMaterial({ color: '#aaaaaa', metalness: 0.95, roughness: 0.05 })
-  const glassMat = new THREE.MeshStandardMaterial({ color: '#223344', metalness: 0.3, roughness: 0.1, transparent: true, opacity: 0.7 })
-
-  // ── Main chassis / body ──────────────────────────────────────
-  const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.22, 0.72), teamMat)
-  body.position.set(0, 0.22, 0)
-  group.add(body)
-
-  const engineCover = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.38, 0.56), teamMat)
-  engineCover.position.set(-0.5, 0.38, 0)
-  group.add(engineCover)
-
-  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.18, 0.38), teamMat)
-  nose.position.set(1.65, 0.16, 0)
-  group.add(nose)
-
-  // ── Cockpit ──────────────────────────────────────────────────
-  const cockpit = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.1, 0.36), glassMat)
-  cockpit.position.set(0.35, 0.48, 0)
-  group.add(cockpit)
-
-  const cockpitRim = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.05, 0.44), carbonMat)
-  cockpitRim.position.set(0.35, 0.44, 0)
-  group.add(cockpitRim)
-
-  // ── Halo ─────────────────────────────────────────────────────
-  const haloL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.28, 0.05), carbonMat)
-  haloL.position.set(0.35, 0.57, -0.17)
-  group.add(haloL)
-  const haloR = haloL.clone()
-  haloR.position.z = 0.17
-  group.add(haloR)
-  const haloTop = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.05, 0.36), carbonMat)
-  haloTop.position.set(0.35, 0.72, 0)
-  group.add(haloTop)
-
-  // ── Sidepods ─────────────────────────────────────────────────
-  const spL = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.28, 0.3), teamMat)
-  spL.position.set(-0.05, 0.16, -0.52)
-  group.add(spL)
-  const spR = spL.clone()
-  spR.position.z = 0.52
-  group.add(spR)
-
-  const inletL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.18, 0.12), carbonMat)
-  inletL.position.set(0.66, 0.2, -0.54)
-  group.add(inletL)
-  const inletR = inletL.clone()
-  inletR.position.z = 0.54
-  group.add(inletR)
-
-  // ── Floor / undertray ────────────────────────────────────────
-  const floor = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.04, 1.35), carbonMat)
-  floor.position.set(-0.1, 0.04, 0)
-  group.add(floor)
-
-  // ── Front wing ───────────────────────────────────────────────
-  const fwMain = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.05, 1.85), teamMat)
-  fwMain.position.set(1.85, 0.06, 0)
-  group.add(fwMain)
-
-  const fwFlap = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.04, 1.6), teamMat)
-  fwFlap.position.set(1.83, 0.12, 0)
-  group.add(fwFlap)
-
-  const fwEpL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.13, 0.04), teamMat)
-  fwEpL.position.set(1.8, 0.09, -0.93)
-  group.add(fwEpL)
-  const fwEpR = fwEpL.clone()
-  fwEpR.position.z = 0.93
-  group.add(fwEpR)
-
-  const fwConn = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.04), teamMat)
-  fwConn.position.set(1.7, 0.1, -0.7)
-  group.add(fwConn)
-  const fwConnR = fwConn.clone()
-  fwConnR.position.z = 0.7
-  group.add(fwConnR)
-
-  // ── Rear wing ────────────────────────────────────────────────
-  const rwMain = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.05, 1.0), teamMat)
-  rwMain.position.set(-1.78, 0.72, 0)
-  group.add(rwMain)
-  const rwFlap = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.96), teamMat)
-  rwFlap.position.set(-1.78, 0.79, 0)
-  group.add(rwFlap)
-
-  const rwEpL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.16, 0.05), teamMat)
-  rwEpL.position.set(-1.78, 0.74, -0.51)
-  group.add(rwEpL)
-  const rwEpR = rwEpL.clone()
-  rwEpR.position.z = 0.51
-  group.add(rwEpR)
-
-  const rwSuppL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.52, 0.05), carbonMat)
-  rwSuppL.position.set(-1.78, 0.46, -0.25)
-  group.add(rwSuppL)
-  const rwSuppR = rwSuppL.clone()
-  rwSuppR.position.z = 0.25
-  group.add(rwSuppR)
-
-  const beamWing = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.6), carbonMat)
-  beamWing.position.set(-1.6, 0.52, 0)
-  group.add(beamWing)
-
-  // ── Wheels ────────────────────────────────────────────────────
-  const wheelPositions = [
-    { x: 1.38, z: -0.57, front: true },
-    { x: 1.38, z: 0.57, front: true },
-    { x: -1.28, z: -0.6, front: false },
-    { x: -1.28, z: 0.6, front: false },
-  ]
-
-  wheelPositions.forEach(({ x, z, front }) => {
-    const radius = front ? 0.29 : 0.32
-    const width = front ? 0.26 : 0.32
-
-    const wheelGeom = new THREE.CylinderGeometry(radius, radius, width, 24)
-    const wheel = new THREE.Mesh(wheelGeom, tireMat)
-    wheel.rotation.x = Math.PI / 2
-    wheel.position.set(x, radius, z)
-    group.add(wheel)
-
-    const rimGeom = new THREE.CylinderGeometry(radius * 0.65, radius * 0.65, width + 0.02, 18)
-    const rim = new THREE.Mesh(rimGeom, rimMat)
-    rim.rotation.x = Math.PI / 2
-    rim.position.set(x, radius, z)
-    group.add(rim)
-
-    const hubGeom = new THREE.CylinderGeometry(0.06, 0.06, width + 0.04, 8)
-    const hub = new THREE.Mesh(hubGeom, new THREE.MeshStandardMaterial({ color, metalness: 0.9, roughness: 0.1 }))
-    hub.rotation.x = Math.PI / 2
-    hub.position.set(x, radius, z)
-    group.add(hub)
-
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(z) * 1.5, 0.03, 0.03), carbonMat)
-    arm.position.set(x, radius, z * 0.3)
-    group.add(arm)
-  })
-
-  // ── Exhaust ───────────────────────────────────────────────────
-  const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.04, 0.3, 8), carbonMat)
-  exhaust.rotation.x = Math.PI / 2
-  exhaust.rotation.z = Math.PI / 8
-  exhaust.position.set(-1.55, 0.45, 0)
-  group.add(exhaust)
-
-  const drs = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.4), carbonMat)
-  drs.position.set(-1.78, 0.76, 0)
-  group.add(drs)
-
-  group.traverse((obj) => {
-    if (obj instanceof THREE.Mesh) {
-      obj.castShadow = true
-      obj.receiveShadow = true
-    }
-  })
-
-  return group
-}
-
-function createSpeedLines(count: number): THREE.Points {
-  const positions = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 30
-    positions[i * 3 + 1] = (Math.random() - 0.8) * 4
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 8
-  }
-  const geo = new THREE.BufferGeometry()
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-  const mat = new THREE.PointsMaterial({ color: '#ffffff', size: 0.04, transparent: true, opacity: 0.3 })
-  return new THREE.Points(geo, mat)
-}
-
 export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null)
-  const sceneRef = useRef<{
-    renderer: THREE.WebGLRenderer
-    scene: THREE.Scene
-    camera: THREE.PerspectiveCamera
-    car: THREE.Group
-    speedLines: THREE.Points
-    teamLight: THREE.PointLight
-    animId: number
-    t: number
-  } | null>(null)
 
   useEffect(() => {
     if (!mountRef.current) return
     const mount = mountRef.current
-    const W = mount.clientWidth
-    const H = mount.clientHeight
+    const w = mount.clientWidth
+    const h = mount.clientHeight
 
-    const scene = new THREE.Scene()
-    scene.fog = new THREE.Fog('#050508', 20, 50)
-
-    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100)
-    camera.position.set(0, 3.5, 9)
-    camera.lookAt(0, 0.5, 0)
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    renderer.setSize(W, H)
+    // ── Renderer ──────────────────────────────────────────────
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+    renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.2
+    renderer.toneMappingExposure = 1.4
+    renderer.outputColorSpace = THREE.SRGBColorSpace
     mount.appendChild(renderer.domElement)
 
-    const ambient = new THREE.AmbientLight('#ffffff', 0.3)
-    scene.add(ambient)
+    // ── Scene ──────────────────────────────────────────────
+    const scene = new THREE.Scene()
+    scene.background = new THREE.Color(0x050508)
+    scene.fog = new THREE.FogExp2(0x050508, 0.055)
 
-    const sun = new THREE.DirectionalLight('#fff5e0', 2.5)
-    sun.position.set(5, 8, 3)
-    sun.castShadow = true
-    sun.shadow.mapSize.set(2048, 2048)
-    sun.shadow.camera.near = 0.5
-    sun.shadow.camera.far = 30
-    sun.shadow.camera.left = -8
-    sun.shadow.camera.right = 8
-    sun.shadow.camera.top = 6
-    sun.shadow.camera.bottom = -6
-    scene.add(sun)
+    // ── Camera ─────────────────────────────────────────────
+    const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 150)
+    camera.position.set(8, 3.2, 5)
+    camera.lookAt(0, 0.6, 0)
 
-    const rimLight = new THREE.DirectionalLight('#4466ff', 1.2)
-    rimLight.position.set(-5, 3, -4)
+    // ── Parse team color ─────────────────────────────────────────
+    const tcHex = parseInt(teamColor.replace('#', '0x'), 16)
+
+    // ── Lights ─────────────────────────────────────────────
+    scene.add(new THREE.AmbientLight(0x0d0d1a, 3))
+    scene.add(new THREE.HemisphereLight(0x112244, 0x000000, 1.5))
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 6)
+    keyLight.position.set(5, 10, 4)
+    keyLight.castShadow = true
+    keyLight.shadow.mapSize.setScalar(2048)
+    keyLight.shadow.camera.near = 0.5
+    keyLight.shadow.camera.far = 40
+    keyLight.shadow.camera.left = -8
+    keyLight.shadow.camera.right = 8
+    keyLight.shadow.camera.top = 8
+    keyLight.shadow.camera.bottom = -8
+    keyLight.shadow.bias = -0.001
+    scene.add(keyLight)
+
+    const fillLight = new THREE.PointLight(tcHex, 12, 14)
+    fillLight.position.set(-4, 2.5, 2)
+    scene.add(fillLight)
+
+    const rimLight = new THREE.DirectionalLight(0x2244ff, 3)
+    rimLight.position.set(-7, 4, -5)
     scene.add(rimLight)
 
-    const teamLight = new THREE.PointLight(teamColor, 4, 4)
-    teamLight.position.set(0, 0.3, 0)
-    scene.add(teamLight)
+    const underGlow = new THREE.PointLight(tcHex, 5, 6)
+    underGlow.position.set(0, -0.2, 0)
+    scene.add(underGlow)
 
-    const frontLight = new THREE.SpotLight('#ffffff', 3, 10, Math.PI / 8, 0.5)
-    frontLight.position.set(4, 2, 0)
-    scene.add(frontLight)
+    const rearLight = new THREE.PointLight(0xff3300, 4, 5)
+    rearLight.position.set(-3, 1, 0)
+    scene.add(rearLight)
 
-    const trackGeo = new THREE.PlaneGeometry(60, 5)
-    const trackMat = new THREE.MeshStandardMaterial({ color: '#1a1a1f', metalness: 0.1, roughness: 0.95 })
-    const track = new THREE.Mesh(trackGeo, trackMat)
-    track.rotation.x = -Math.PI / 2
-    track.receiveShadow = true
-    scene.add(track)
+    // ── Materials ────────────────────────────────────────────
+    const bodyMat = new THREE.MeshPhysicalMaterial({
+      color: tcHex,
+      metalness: 0.85,
+      roughness: 0.12,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+    })
+    const carbonMat = new THREE.MeshPhysicalMaterial({
+      color: 0x0e0e0e,
+      metalness: 0.5,
+      roughness: 0.25,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.1,
+    })
+    const darkMat  = new THREE.MeshStandardMaterial({ color: 0x111118, metalness: 0.3, roughness: 0.7 })
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0x88aadd,
+      metalness: 0.0,
+      roughness: 0.0,
+      transmission: 0.8,
+      transparent: true,
+      opacity: 0.35,
+    })
+    const tireMat    = new THREE.MeshStandardMaterial({ color: 0x0d0d0d, metalness: 0.0, roughness: 0.95 })
+    const rimMat     = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.92, roughness: 0.12 })
+    const whiteMat   = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5, roughness: 0.2 })
+    const haloMat    = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.8, roughness: 0.2 })
+    const exhaustMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.98, roughness: 0.05 })
 
-    const lineGeo = new THREE.PlaneGeometry(60, 0.12)
-    const lineMat = new THREE.MeshStandardMaterial({ color: '#ffffff', opacity: 0.15, transparent: true })
-    const racingLine = new THREE.Mesh(lineGeo, lineMat)
-    racingLine.rotation.x = -Math.PI / 2
-    racingLine.position.y = 0.001
-    scene.add(racingLine)
-
-    for (let i = -29; i < 30; i += 2) {
-      const kerbMat = new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? '#cc0000' : '#ffffff' })
-      const kerb = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.02, 0.3), kerbMat)
-      kerb.position.set(i, 0.01, 2.3)
-      scene.add(kerb)
-      const kerbR = kerb.clone()
-      kerbR.position.z = -2.3
-      scene.add(kerbR)
+    // ── Helper ─────────────────────────────────────────────
+    function box(bw: number, bh: number, bd: number, mat: THREE.Material, x = 0, y = 0, z = 0) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd), mat)
+      m.position.set(x, y, z)
+      m.castShadow = true
+      m.receiveShadow = true
+      return m
     }
 
-    const speedLines = createSpeedLines(300)
-    scene.add(speedLines)
+    // ── Build F1 Car ───────────────────────────────────────────
+    const car = new THREE.Group()
 
-    const car = buildF1Car(teamColor)
-    car.position.set(10, 0, 0)
-    car.rotation.y = Math.PI / 2
+    car.add(box(4.0, 0.055, 1.25, carbonMat, 0, 0.035, 0))
+    car.add(box(2.8, 0.42, 0.60, bodyMat, 0.1, 0.32, 0))
+    car.add(box(2.0, 0.30, 0.38, bodyMat, -0.2, 0.22, -0.44))
+    car.add(box(2.0, 0.30, 0.38, bodyMat, -0.2, 0.22,  0.44))
+    car.add(box(0.28, 0.22, 0.06, darkMat, 0.85, 0.24, -0.64))
+    car.add(box(0.28, 0.22, 0.06, darkMat, 0.85, 0.24,  0.64))
+    car.add(box(1.05, 0.52, 0.54, bodyMat, -0.78, 0.46, 0))
+    car.add(box(0.75, 0.42, 0.50, bodyMat, -1.28, 0.38, 0))
+
+    const noseSegs: [number, number, number][] = [
+      [0.44, 0.28, 0.56], [0.38, 0.24, 0.50], [0.36, 0.20, 0.42],
+      [0.34, 0.16, 0.34], [0.30, 0.12, 0.24], [0.26, 0.08, 0.16],
+    ]
+    noseSegs.forEach(([bw, bh, bd], i) => {
+      car.add(box(bw, bh, bd, bodyMat, 1.25 + i * 0.22, 0.20 - i * 0.018, 0))
+    })
+    car.add(box(0.22, 0.06, 0.10, darkMat, 2.55, 0.13, 0))
+
+    car.add(box(0.72, 0.16, 0.54, bodyMat, 0.55, 0.48, 0))
+    car.add(box(0.58, 0.13, 0.48, bodyMat, 0.22, 0.47, 0))
+    car.add(box(0.52, 0.15, 0.36, glassMat, 0.45, 0.54, 0))
+
+    car.add(box(0.07, 0.24, 0.07, haloMat, 0.72, 0.60, -0.14))
+    car.add(box(0.07, 0.24, 0.07, haloMat, 0.72, 0.60,  0.14))
+    car.add(box(0.68, 0.055, 0.34, haloMat, 0.45, 0.72, 0))
+    car.add(box(0.30, 0.055, 0.14, haloMat, 0.78, 0.72, 0))
+
+    car.add(box(0.10, 0.035, 1.60, carbonMat, 2.08, 0.07, 0))
+    car.add(box(0.12, 0.032, 1.45, bodyMat,   2.05, 0.13, 0))
+    car.add(box(0.10, 0.030, 1.32, carbonMat, 2.03, 0.18, 0))
+    car.add(box(0.28, 0.22, 0.055, bodyMat, 2.04, 0.10, -0.80))
+    car.add(box(0.28, 0.22, 0.055, bodyMat, 2.04, 0.10,  0.80))
+    car.add(box(0.10, 0.045, 0.28, bodyMat, 1.88, 0.20, -0.60))
+    car.add(box(0.10, 0.045, 0.28, bodyMat, 1.88, 0.20,  0.60))
+
+    car.add(box(0.10, 0.048, 1.08, bodyMat,   -1.70, 0.80, 0))
+    car.add(box(0.09, 0.040, 0.98, carbonMat, -1.67, 0.90, 0))
+    car.add(box(0.055, 0.28, 0.055, carbonMat, -1.72, 0.68, -0.46))
+    car.add(box(0.055, 0.28, 0.055, carbonMat, -1.72, 0.68,  0.46))
+    car.add(box(0.20, 0.30, 0.055, bodyMat, -1.70, 0.73, -0.57))
+    car.add(box(0.20, 0.30, 0.055, bodyMat, -1.70, 0.73,  0.57))
+    car.add(box(0.07, 0.038, 0.74, carbonMat, -1.62, 0.48, 0))
+
+    function makeWheel(x: number, z: number, front: boolean) {
+      const g = new THREE.Group()
+      const tr = front ? 0.265 : 0.305
+      const tw = front ? 0.215 : 0.285
+      const tire = new THREE.Mesh(new THREE.CylinderGeometry(tr, tr, tw, 28), tireMat)
+      tire.rotation.x = Math.PI / 2; tire.castShadow = true; g.add(tire)
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(tr * 0.68, tr * 0.68, tw + 0.01, 12), rimMat)
+      rim.rotation.x = Math.PI / 2; g.add(rim)
+      for (let i = 0; i < 6; i++) {
+        const spoke = new THREE.Mesh(new THREE.BoxGeometry(tr * 0.55, 0.025, 0.025), rimMat)
+        spoke.rotation.z = (i / 6) * Math.PI * 2
+        g.add(spoke)
+      }
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, tw + 0.02, 8), bodyMat)
+      cap.rotation.x = Math.PI / 2; g.add(cap)
+      const nut = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, tw + 0.03, 6), whiteMat)
+      nut.rotation.x = Math.PI / 2; g.add(nut)
+      g.position.set(x, tr, z)
+      return g
+    }
+
+    const wheelFL = makeWheel( 1.42, -0.72, true)
+    const wheelFR = makeWheel( 1.42,  0.72, true)
+    const wheelRL = makeWheel(-1.38, -0.76, false)
+    const wheelRR = makeWheel(-1.38,  0.76, false)
+    car.add(wheelFL, wheelFR, wheelRL, wheelRR)
+
+    for (const z of [-0.72, 0.72]) {
+      car.add(box(0.78, 0.028, 0.028, darkMat, 1.05, 0.23, z * 0.6))
+      car.add(box(0.78, 0.028, 0.028, darkMat, 1.05, 0.34, z * 0.6))
+    }
+    for (const z of [-0.76, 0.76]) {
+      car.add(box(0.72, 0.028, 0.028, darkMat, -0.98, 0.28, z * 0.58))
+      car.add(box(0.72, 0.028, 0.028, darkMat, -0.98, 0.38, z * 0.58))
+    }
+
+    const exhaust = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.038, 0.22, 10), exhaustMat)
+    exhaust.rotation.z = Math.PI / 2
+    exhaust.position.set(-1.78, 0.56, 0)
+    exhaust.castShadow = true
+    car.add(exhaust)
+
+    car.rotation.y = Math.PI * 0.12
     scene.add(car)
 
-    let t = 0
+    // ── Environment ────────────────────────────────────────────
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(60, 60),
+      new THREE.MeshStandardMaterial({ color: 0x0a0a0f, roughness: 0.98, metalness: 0.0 })
+    )
+    ground.rotation.x = -Math.PI / 2
+    ground.receiveShadow = true
+    scene.add(ground)
+
+    const pitFloor = new THREE.Mesh(
+      new THREE.PlaneGeometry(12, 5),
+      new THREE.MeshStandardMaterial({ color: 0x111116, roughness: 0.9, metalness: 0.05 })
+    )
+    pitFloor.rotation.x = -Math.PI / 2
+    pitFloor.position.y = 0.001
+    pitFloor.receiveShadow = true
+    scene.add(pitFloor)
+
+    const gridMat = new THREE.MeshBasicMaterial({ color: 0x1e1e28, transparent: true, opacity: 0.8, side: THREE.DoubleSide })
+    for (let x = -5; x <= 5; x++) {
+      const line = new THREE.Mesh(new THREE.PlaneGeometry(0.02, 5), gridMat)
+      line.rotation.x = -Math.PI / 2
+      line.position.set(x, 0.002, 0)
+      scene.add(line)
+    }
+    for (let z = -2; z <= 2; z++) {
+      const line = new THREE.Mesh(new THREE.PlaneGeometry(12, 0.02), gridMat)
+      line.rotation.x = -Math.PI / 2
+      line.position.set(0, 0.002, z)
+      scene.add(line)
+    }
+
+    const stripMat = new THREE.MeshBasicMaterial({ color: tcHex, transparent: true, opacity: 0.12, side: THREE.DoubleSide })
+    for (const z of [-2.2, 2.2]) {
+      const strip = new THREE.Mesh(new THREE.PlaneGeometry(10, 0.08), stripMat)
+      strip.rotation.x = -Math.PI / 2
+      strip.position.set(0, 0.003, z)
+      scene.add(strip)
+    }
+
+    const wall = new THREE.Mesh(
+      new THREE.BoxGeometry(20, 6, 0.3),
+      new THREE.MeshStandardMaterial({ color: 0x08080e, roughness: 1, metalness: 0 })
+    )
+    wall.position.set(0, 3, -4.5)
+    wall.receiveShadow = true
+    scene.add(wall)
+
+    for (let i = -2; i <= 2; i++) {
+      const panel = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 1.0, 0.01),
+        new THREE.MeshStandardMaterial({
+          color: tcHex,
+          emissive: new THREE.Color(tcHex),
+          emissiveIntensity: 0.08,
+          roughness: 0.3,
+          metalness: 0.6,
+        })
+      )
+      panel.position.set(i * 2.6, 2.5, -4.3)
+      scene.add(panel)
+    }
+
+    // ── Particles ────────────────────────────────────────────
+    const PARTICLE_COUNT = 500
+    const pPos = new Float32Array(PARTICLE_COUNT * 3)
+    const pVel = new Float32Array(PARTICLE_COUNT)
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      pPos[i * 3]     = (Math.random() - 0.5) * 22
+      pPos[i * 3 + 1] = Math.random() * 2.5
+      pPos[i * 3 + 2] = (Math.random() - 0.5) * 7
+      pVel[i] = 0.025 + Math.random() * 0.055
+    }
+    const pGeo = new THREE.BufferGeometry()
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3))
+    const pMat = new THREE.PointsMaterial({ color: tcHex, size: 0.022, sizeAttenuation: true, transparent: true, opacity: 0.5 })
+    const particles = new THREE.Points(pGeo, pMat)
+    scene.add(particles)
+
+    for (let i = 1; i <= 3; i++) {
+      const gm = new THREE.MeshBasicMaterial({ color: tcHex, transparent: true, opacity: 0.08 / i, side: THREE.DoubleSide })
+      const ring = new THREE.Mesh(new THREE.RingGeometry(i * 0.9, i * 0.9 + 0.06, 48), gm)
+      ring.rotation.x = -Math.PI / 2
+      ring.position.set(0, 0.002, 0)
+      scene.add(ring)
+    }
+
+    // ── Animate ────────────────────────────────────────────
+    const clock = new THREE.Clock()
     let animId = 0
 
     function animate() {
       animId = requestAnimationFrame(animate)
-      t += 0.016
+      const t = clock.getElapsedTime()
 
-      const speed = 8
-      const x = 10 - ((t * speed) % 22)
-      car.position.x = x
+      camera.position.x = Math.cos(t * 0.14) * 8.5
+      camera.position.z = Math.sin(t * 0.14) * 8.5 * 0.75
+      camera.position.y = 2.8 + Math.sin(t * 0.25) * 0.35
+      camera.lookAt(0, 0.7, 0)
 
-      // Wheel spin
-      car.children.forEach((child) => {
-        if (child instanceof THREE.Mesh) {
-          const geom = child.geometry
-          if (geom instanceof THREE.CylinderGeometry && geom.parameters.radiusTop > 0.15) {
-            child.rotation.y += 0.15
-          }
-        }
-      })
+      car.position.y = Math.sin(t * 1.1) * 0.018
+      car.rotation.y = Math.PI * 0.12 + Math.sin(t * 0.35) * 0.04
 
-      car.position.y = Math.sin(t * 12) * 0.01
-      car.rotation.z = Math.sin(t * 8) * 0.005
-      teamLight.position.x = car.position.x
+      const s = 3.5 * 0.016
+      wheelFL.rotation.z += s; wheelFR.rotation.z += s
+      wheelRL.rotation.z += s; wheelRR.rotation.z += s
 
-      const posAttr = speedLines.geometry.getAttribute('position') as THREE.BufferAttribute
-      for (let i = 0; i < posAttr.count; i++) {
-        let px = posAttr.getX(i) - 0.15
-        if (px < -15) px = 15
-        posAttr.setX(i, px)
+      fillLight.intensity = 10 + Math.sin(t * 1.8) * 2.5
+      underGlow.intensity = 4  + Math.sin(t * 2.2) * 1.5
+      rearLight.intensity = 3  + Math.sin(t * 1.3) * 1.5
+
+      const pos = particles.geometry.attributes.position
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        pos.setX(i, pos.getX(i) - pVel[i])
+        if (pos.getX(i) < -11) pos.setX(i, 11)
       }
-      posAttr.needsUpdate = true
+      pos.needsUpdate = true
 
       renderer.render(scene, camera)
     }
 
     animate()
 
-    const handleResize = () => {
-      if (!mount) return
-      const w = mount.clientWidth
-      const h = mount.clientHeight
-      camera.aspect = w / h
+    // ── Resize ────────────────────────────────────────────
+    function onResize() {
+      if (!mountRef.current) return
+      const nw = mountRef.current.clientWidth
+      const nh = mountRef.current.clientHeight
+      camera.aspect = nw / nh
       camera.updateProjectionMatrix()
-      renderer.setSize(w, h)
+      renderer.setSize(nw, nh)
     }
-    window.addEventListener('resize', handleResize)
-
-    sceneRef.current = { renderer, scene, camera, car, speedLines, teamLight, animId: 0, t: 0 }
+    window.addEventListener('resize', onResize)
 
     return () => {
-      window.removeEventListener('resize', handleResize)
       cancelAnimationFrame(animId)
-      renderer.dispose()
+      window.removeEventListener('resize', onResize)
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement)
+      renderer.dispose()
     }
   }, [teamColor])
 
-  return (
-    <div
-      ref={mountRef}
-      className="w-full h-full"
-      style={{ background: 'transparent' }}
-    />
-  )
+  return <div ref={mountRef} className="w-full h-full" />
 }

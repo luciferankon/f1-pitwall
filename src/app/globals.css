@@ -14,8 +14,13 @@
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -34,18 +39,27 @@
 }
 
 @keyframes row-in {
-  from { opacity: 0; transform: translateX(-12px); }
+  from { opacity: 0; transform: translateX(-16px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.92); }
+  from { opacity: 0; transform: scale(0.9); }
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* Stagger animation utility */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(232, 0, 45, 0.2); }
+  50%      { box-shadow: 0 0 40px rgba(232, 0, 45, 0.4); }
+}
+
 .stagger-in > * {
-  animation: row-in 0.4s ease-out both;
+  animation: row-in 0.45s ease-out both;
 }
 .stagger-in > *:nth-child(1)  { animation-delay: 0.02s; }
 .stagger-in > *:nth-child(2)  { animation-delay: 0.04s; }
@@ -58,3 +72,34 @@
 .stagger-in > *:nth-child(9)  { animation-delay: 0.18s; }
 .stagger-in > *:nth-child(10) { animation-delay: 0.20s; }
 .stagger-in > *:nth-child(n+11) { animation-delay: 0.22s; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-lift {
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.glass {
+  background: rgba(13, 13, 20, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #E8002D, #FF8000, #3671C6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

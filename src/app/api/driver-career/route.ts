@@ -1,72 +1,82 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const BASE = 'https://api.jolpi.ca/ergast/f1'
+const MAX_RETRIES = 2
 
-async function safeTotal(url: string): Promise<number> {
-  try {
-    const res = await fetch(url, { cache: 'force-cache', next: { revalidate: 3600 } })
-    if (!res.ok) return 0
-    const data = await res.json()
-    return parseInt(data?.MRData?.total ?? '0', 10) || 0
-  } catch {
-    return 0
+async function fetchWithRetry(url: string, retries = MAX_RETRIES): Promise<any> {
+  let lastError: Error | null = null
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      return await res.json()
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      if (attempt < retries) await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500))
+    }
   }
-}
-
-async function safeJSON(url: string) {
-  try {
-    const res = await fetch(url, { cache: 'force-cache', next: { revalidate: 3600 } })
-    if (!res.ok) return null
-    return await res.json()
-  } catch {
-    return null
-  }
+  throw lastError
 }
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const driverId = searchParams.get('driverId')
+  const driverId = new URL(req.url).searchParams.get('driverId')
   if (!driverId) return NextResponse.json({ error: 'No driverId' }, { status: 400 })
 
   try {
-    // Batch 1 — high-confidence endpoints
-    const [standingsData, totalRaces, wins, p2, p3] = await Promise.all([
-      safeJSON(`${BASE}/drivers/${driverId}/driverStandings.json?limit=50`),
-      safeTotal(`${BASE}/drivers/${driverId}/results.json?limit=1`),
-      safeTotal(`${BASE}/drivers/${driverId}/results/1.json?limit=1`),
-      safeTotal(`${BASE}/drivers/${driverId}/results/2.json?limit=1`),
-      safeTotal(`${BASE}/drivers/${driverId}/results/3.json?limit=1`),
+    // Fetch standings + results in parallel
+    const [standingsData, resultsData] = await Promise.all([
+      fetchWithRetry(`${BASE}/drivers/${driverId}/driverStandings.json?limit=50`),
+      fetchWithRetry(`${BASE}/drivers/${driverId}/results.json?limit=1000`),
     ])
 
-    const seasons: Array<{
-      season: string
-      DriverStandings: Array<{ position: string; points: string; wins: string; Constructors: Array<{ name: string; constructorId: string }> }>
-    }> = standingsData?.MRData?.StandingsTable?.StandingsLists ?? []
+    // Build season history
+    const standingsLists = standingsData?.MRData?.StandingsTable?.StandingsLists ?? []
+    const seasons = standingsLists.map((s: any) => ({
+      season: s.season,
+      DriverStandings: (s.DriverStandings ?? []).map((ds: any) => ({
+        position: ds.position,
+        points: ds.points,
+        wins: ds.wins,
+        Constructors: (ds.Constructors ?? []).map((c: any) => ({ name: c.name, constructorId: c.constructorId })),
+      })),
+    })).sort((a: any, b: any) => parseInt(b.season) - parseInt(a.season))
 
-    // WDC — derived from seasons already fetched (no extra API call)
-    const championships = seasons.filter(s => s.DriverStandings?.[0]?.position === '1').length
+    // Count stats from race results
+    const races = resultsData?.MRData?.RaceTable?.Races ?? []
+    let totalRaces = 0, wins = 0, podiums = 0, poles = 0, fastestLaps = 0
 
-    // Batch 2 — less certain endpoints
-    const [poles, fastestLaps] = await Promise.all([
-      safeTotal(`${BASE}/drivers/${driverId}/qualifying/1.json?limit=1`),
-      safeTotal(`${BASE}/drivers/${driverId}/fastest/1.json?limit=1`),
-    ])
+    for (const race of races) {
+      for (const r of (race.Results ?? [])) {
+        const pos = parseInt(r.position)
+        if (isNaN(pos)) continue
+        totalRaces++
+        if (pos === 1) wins++
+        if (pos <= 3) podiums++
+        if (parseInt(r.grid) === 1) poles++
+        if (r.FastestLap?.rank === '1') fastestLaps++
+      }
+    }
 
+    // Championships from standings
+    const championships = seasons.filter((s: any) => s.DriverStandings?.[0]?.position === '1').length
+
+    // Total career points
     let totalPoints = 0
-    seasons.forEach(s => {
-      const pts = parseFloat(s.DriverStandings?.[0]?.points ?? '0')
-      if (!isNaN(pts)) totalPoints += pts
-    })
+    for (const s of seasons) {
+      totalPoints += parseFloat(s.DriverStandings?.[0]?.points ?? '0') || 0
+    }
 
     return NextResponse.json({
       seasons,
       totalRaces,
       wins,
-      podiums: wins + p2 + p3,
+      podiums,
       poles,
       fastestLaps,
       championships,
       totalPoints: Math.round(totalPoints),
+    }, {
+      headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' },
     })
   } catch (err) {
     console.error('[driver-career]', err)

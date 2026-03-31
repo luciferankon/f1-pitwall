@@ -21,12 +21,10 @@ function buildF1Car(color: string): THREE.Group {
   body.position.set(0, 0.22, 0)
   group.add(body)
 
-  // Engine cover (high rear section)
   const engineCover = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.38, 0.56), teamMat)
   engineCover.position.set(-0.5, 0.38, 0)
   group.add(engineCover)
 
-  // Nose cone
   const nose = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.18, 0.38), teamMat)
   nose.position.set(1.65, 0.16, 0)
   group.add(nose)
@@ -36,7 +34,6 @@ function buildF1Car(color: string): THREE.Group {
   cockpit.position.set(0.35, 0.48, 0)
   group.add(cockpit)
 
-  // Cockpit surround
   const cockpitRim = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.05, 0.44), carbonMat)
   cockpitRim.position.set(0.35, 0.44, 0)
   group.add(cockpitRim)
@@ -60,7 +57,6 @@ function buildF1Car(color: string): THREE.Group {
   spR.position.z = 0.52
   group.add(spR)
 
-  // Sidepod inlet
   const inletL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.18, 0.12), carbonMat)
   inletL.position.set(0.66, 0.2, -0.54)
   group.add(inletL)
@@ -89,7 +85,6 @@ function buildF1Car(color: string): THREE.Group {
   fwEpR.position.z = 0.93
   group.add(fwEpR)
 
-  // Front wing connector / cascade
   const fwConn = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.12, 0.04), teamMat)
   fwConn.position.set(1.7, 0.1, -0.7)
   group.add(fwConn)
@@ -119,7 +114,6 @@ function buildF1Car(color: string): THREE.Group {
   rwSuppR.position.z = 0.25
   group.add(rwSuppR)
 
-  // Beam wing
   const beamWing = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.6), carbonMat)
   beamWing.position.set(-1.6, 0.52, 0)
   group.add(beamWing)
@@ -142,24 +136,20 @@ function buildF1Car(color: string): THREE.Group {
     wheel.position.set(x, radius, z)
     group.add(wheel)
 
-    // Rim
     const rimGeom = new THREE.CylinderGeometry(radius * 0.65, radius * 0.65, width + 0.02, 18)
     const rim = new THREE.Mesh(rimGeom, rimMat)
     rim.rotation.x = Math.PI / 2
     rim.position.set(x, radius, z)
     group.add(rim)
 
-    // Wheel nut / hub
     const hubGeom = new THREE.CylinderGeometry(0.06, 0.06, width + 0.04, 8)
     const hub = new THREE.Mesh(hubGeom, new THREE.MeshStandardMaterial({ color, metalness: 0.9, roughness: 0.1 }))
     hub.rotation.x = Math.PI / 2
     hub.position.set(x, radius, z)
     group.add(hub)
 
-    // Suspension arm
     const arm = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(z) * 1.5, 0.03, 0.03), carbonMat)
     arm.position.set(x, radius, z * 0.3)
-    arm.rotation.z = Math.atan2(0, Math.abs(z))
     group.add(arm)
   })
 
@@ -170,12 +160,10 @@ function buildF1Car(color: string): THREE.Group {
   exhaust.position.set(-1.55, 0.45, 0)
   group.add(exhaust)
 
-  // ── DRS actuator ─────────────────────────────────────────────
   const drs = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.4), carbonMat)
   drs.position.set(-1.78, 0.76, 0)
   group.add(drs)
 
-  // Cast shadows
   group.traverse((obj) => {
     if (obj instanceof THREE.Mesh) {
       obj.castShadow = true
@@ -218,16 +206,13 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
     const W = mount.clientWidth
     const H = mount.clientHeight
 
-    // Scene
     const scene = new THREE.Scene()
     scene.fog = new THREE.Fog('#050508', 20, 50)
 
-    // Camera — side angle shot
     const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100)
     camera.position.set(0, 3.5, 9)
     camera.lookAt(0, 0.5, 0)
 
-    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(W, H)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -237,7 +222,6 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
     renderer.toneMappingExposure = 1.2
     mount.appendChild(renderer.domElement)
 
-    // Lighting
     const ambient = new THREE.AmbientLight('#ffffff', 0.3)
     scene.add(ambient)
 
@@ -257,17 +241,14 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
     rimLight.position.set(-5, 3, -4)
     scene.add(rimLight)
 
-    // Team colour glow under car
     const teamLight = new THREE.PointLight(teamColor, 4, 4)
     teamLight.position.set(0, 0.3, 0)
     scene.add(teamLight)
 
-    // Headlight-style front
     const frontLight = new THREE.SpotLight('#ffffff', 3, 10, Math.PI / 8, 0.5)
     frontLight.position.set(4, 2, 0)
     scene.add(frontLight)
 
-    // Track surface
     const trackGeo = new THREE.PlaneGeometry(60, 5)
     const trackMat = new THREE.MeshStandardMaterial({ color: '#1a1a1f', metalness: 0.1, roughness: 0.95 })
     const track = new THREE.Mesh(trackGeo, trackMat)
@@ -275,7 +256,6 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
     track.receiveShadow = true
     scene.add(track)
 
-    // Racing line (white strip)
     const lineGeo = new THREE.PlaneGeometry(60, 0.12)
     const lineMat = new THREE.MeshStandardMaterial({ color: '#ffffff', opacity: 0.15, transparent: true })
     const racingLine = new THREE.Mesh(lineGeo, lineMat)
@@ -283,7 +263,6 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
     racingLine.position.y = 0.001
     scene.add(racingLine)
 
-    // Kerb strips at edge of track
     for (let i = -29; i < 30; i += 2) {
       const kerbMat = new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? '#cc0000' : '#ffffff' })
       const kerb = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.02, 0.3), kerbMat)
@@ -294,29 +273,26 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
       scene.add(kerbR)
     }
 
-    // Speed line particles
     const speedLines = createSpeedLines(300)
     scene.add(speedLines)
 
-    // F1 Car
     const car = buildF1Car(teamColor)
     car.position.set(10, 0, 0)
-    car.rotation.y = Math.PI / 2 // Face the direction of travel (along -X)
+    car.rotation.y = Math.PI / 2
     scene.add(car)
 
     let t = 0
+    let animId = 0
 
     function animate() {
-      const id = requestAnimationFrame(animate)
-      sceneRef.current!.animId = id
+      animId = requestAnimationFrame(animate)
       t += 0.016
 
-      // Car drives from right (+X) to left (-X)
       const speed = 8
       const x = 10 - ((t * speed) % 22)
       car.position.x = x
 
-      // Wheels spin
+      // Wheel spin
       car.children.forEach((child) => {
         if (child instanceof THREE.Mesh) {
           const geom = child.geometry
@@ -326,14 +302,10 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
         }
       })
 
-      // Subtle body roll / bounce
       car.position.y = Math.sin(t * 12) * 0.01
       car.rotation.z = Math.sin(t * 8) * 0.005
-
-      // Team glow follows car
       teamLight.position.x = car.position.x
 
-      // Speed lines drift
       const posAttr = speedLines.geometry.getAttribute('position') as THREE.BufferAttribute
       for (let i = 0; i < posAttr.count; i++) {
         let px = posAttr.getX(i) - 0.15
@@ -358,11 +330,10 @@ export default function HeroScene({ teamColor = '#E8002D' }: HeroSceneProps) {
     window.addEventListener('resize', handleResize)
 
     sceneRef.current = { renderer, scene, camera, car, speedLines, teamLight, animId: 0, t: 0 }
-    sceneRef.current.t = 0
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      cancelAnimationFrame(sceneRef.current?.animId ?? 0)
+      cancelAnimationFrame(animId)
       renderer.dispose()
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement)
     }

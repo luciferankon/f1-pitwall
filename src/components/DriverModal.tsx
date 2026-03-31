@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { DriverStanding } from '@/lib/types'
-import { getTeamColors, COUNTRY_FLAGS } from '@/lib/teamColors'
+import { getTeamColors, getTeamColor, COUNTRY_FLAGS } from '@/lib/teamColors'
 
 interface CareerData {
   seasons: Array<{ season: string; DriverStandings: Array<{ position: string; points: string; wins: string; Constructors: Array<{ name: string; constructorId: string }> }> }>
@@ -68,12 +68,9 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
         onClick={e => e.stopPropagation()}
         style={{ animation: 'slideUp 0.3s ease-out' }}
       >
-        {/* Team colour stripe */}
         <div className="h-1.5" style={{ backgroundColor: colors.primary }} />
 
-        {/* Header */}
         <div className="flex gap-4 p-5 border-b border-[#1e1e2e]">
-          {/* Photo */}
           <div className="w-24 h-28 rounded-xl overflow-hidden bg-[#0d0d14] flex-shrink-0 border border-[#2e2e42]">
             {photo ? (
               <img src={photo} alt={fullName} className="w-full h-full object-cover object-top" />
@@ -113,7 +110,6 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-5">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -121,7 +117,6 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
             </div>
           ) : career ? (
             <>
-              {/* Career Stats Grid */}
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-5">
                 {[
                   { label: 'Races', value: career.totalRaces },
@@ -143,7 +138,6 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                 ))}
               </div>
 
-              {/* Best season highlight */}
               {bestSeason && (
                 <div
                   className="flex items-center gap-3 p-3 rounded-xl mb-4"
@@ -159,7 +153,6 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                 </div>
               )}
 
-              {/* Season-by-season */}
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b6b88] mb-3">Season History</h3>
               <div className="space-y-2">
                 {sortedSeasons.slice(0, 20).map(s => {
@@ -169,7 +162,6 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                   const pts = parseFloat(sd.points)
                   const maxPts = 450
                   const conId = sd.Constructors?.[0]?.constructorId ?? ''
-                  const { getTeamColor } = require('@/lib/teamColors')
                   const tc = getTeamColor(conId)
                   return (
                     <div key={s.season} className="flex items-center gap-3 py-1.5">

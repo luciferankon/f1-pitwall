@@ -20,7 +20,6 @@ interface DriverModalProps {
   onClose: () => void
 }
 
-// Animated number counter
 function AnimatedNumber({ target, duration = 1000 }: { target: number; duration?: number }) {
   const [current, setCurrent] = useState(0)
   const rafRef = useRef<number>(0)
@@ -61,9 +60,11 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
         : Promise.resolve({ photo: null }),
     ])
       .then(([careerData, photoData]) => {
-        setCareer(careerData)
-        setPhoto(photoData.photo)
-        setTimeout(() => setStatsVisible(true), 100)
+        if (careerData && typeof careerData.totalRaces === 'number') {
+          setCareer(careerData)
+          setTimeout(() => setStatsVisible(true), 100)
+        }
+        setPhoto(photoData?.photo ?? null)
       })
       .finally(() => setLoading(false))
   }, [Driver.driverId, Driver.url])
@@ -74,9 +75,9 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const sortedSeasons = career?.seasons
-    .filter(s => s.DriverStandings?.length > 0)
-    .sort((a, b) => parseInt(b.season) - parseInt(a.season)) ?? []
+  const sortedSeasons = (career?.seasons ?? [])
+    .filter((s) => (s.DriverStandings?.length ?? 0) > 0)
+    .sort((a, b) => parseInt(b.season) - parseInt(a.season))
 
   const bestSeason = sortedSeasons.reduce((best, s) => {
     const pos = parseInt(s.DriverStandings[0]?.position ?? '99')
@@ -104,7 +105,6 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
         onClick={e => e.stopPropagation()}
         style={{ animation: 'slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)' }}
       >
-        {/* Team colour stripe + shimmer */}
         <div className="h-1.5 relative overflow-hidden" style={{ backgroundColor: colors.primary }}>
           <div
             className="absolute inset-y-0 w-1/3 bg-white/30"
@@ -112,24 +112,15 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
           />
         </div>
 
-        {/* Header */}
         <div className="flex gap-4 p-5 border-b border-[#1e1e2e]">
           <div
             className="w-24 h-28 rounded-xl overflow-hidden flex-shrink-0 border border-[#2e2e42]"
             style={{ background: `linear-gradient(135deg, ${colors.primary}22, ${colors.primary}55)` }}
           >
             {photo ? (
-              <img
-                src={photo}
-                alt={fullName}
-                className="w-full h-full object-cover object-top"
-                style={{ animation: 'fadeIn 0.5s ease-out' }}
-              />
+              <img src={photo} alt={fullName} className="w-full h-full object-cover object-top" style={{ animation: 'fadeIn 0.5s ease-out' }} />
             ) : (
-              <div
-                className="w-full h-full flex items-center justify-center text-3xl font-black"
-                style={{ color: colors.primary }}
-              >
+              <div className="w-full h-full flex items-center justify-center text-3xl font-black" style={{ color: colors.primary }}>
                 {Driver.givenName[0]}{Driver.familyName[0]}
               </div>
             )}
@@ -141,36 +132,20 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
               <span className="text-[10px] font-bold text-[#6b6b88] uppercase tracking-widest">{Driver.nationality}</span>
             </div>
             <h2 className="text-2xl font-black text-white leading-tight">{fullName}</h2>
-            <div className="font-semibold text-sm mt-0.5" style={{ color: colors.primary }}>
-              {constructor?.name}
-            </div>
+            <div className="font-semibold text-sm mt-0.5" style={{ color: colors.primary }}>{constructor?.name}</div>
             <div className="flex items-center gap-4 mt-2 text-sm flex-wrap">
-              <span className="text-white font-bold">
-                {points}<span className="text-xs text-[#6b6b88] ml-1">pts this season</span>
-              </span>
-              <span className="text-white font-bold">
-                P{position}<span className="text-xs text-[#6b6b88] ml-1">current</span>
-              </span>
-              {wins !== '0' && wins && (
-                <span className="text-white font-bold">
-                  {wins}W<span className="text-xs text-[#6b6b88] ml-1">this season</span>
-                </span>
-              )}
-              {Driver.permanentNumber && (
-                <span className="font-black text-lg" style={{ color: colors.primary }}>#{Driver.permanentNumber}</span>
-              )}
+              <span className="text-white font-bold">{points}<span className="text-xs text-[#6b6b88] ml-1">pts this season</span></span>
+              <span className="text-white font-bold">P{position}<span className="text-xs text-[#6b6b88] ml-1">current</span></span>
+              {wins !== '0' && wins && <span className="text-white font-bold">{wins}W<span className="text-xs text-[#6b6b88] ml-1">this season</span></span>}
+              {Driver.permanentNumber && <span className="font-black text-lg" style={{ color: colors.primary }}>#{Driver.permanentNumber}</span>}
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-xl border border-[#2e2e42] text-[#6b6b88] hover:text-white hover:border-[#3e3e52] transition-all text-lg"
-          >
+          <button onClick={onClose} className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-xl border border-[#2e2e42] text-[#6b6b88] hover:text-white hover:border-[#3e3e52] transition-all text-lg">
             ×
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-5">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
@@ -179,7 +154,6 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
             </div>
           ) : career ? (
             <>
-              {/* Career Stats Grid */}
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-5">
                 {stats.map((stat, idx) => (
                   <div
@@ -202,32 +176,21 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                 ))}
               </div>
 
-              {/* Best season */}
               {bestSeason && (
                 <div
                   className="flex items-center gap-3 p-3 rounded-xl mb-4"
-                  style={{
-                    backgroundColor: colors.primary + '15',
-                    border: `1px solid ${colors.primary}33`,
-                    animation: 'slideUp 0.4s ease-out 0.4s both',
-                  }}
+                  style={{ backgroundColor: colors.primary + '15', border: `1px solid ${colors.primary}33`, animation: 'slideUp 0.4s ease-out 0.4s both' }}
                 >
                   <span className="text-xl">⭐</span>
                   <div className="text-sm">
                     <span className="text-white font-bold">Best season: {bestSeason.season}</span>
-                    <span className="text-[#6b6b88] ml-2">
-                      P{bestSeason.DriverStandings[0]?.position} · {bestSeason.DriverStandings[0]?.points} pts · {bestSeason.DriverStandings[0]?.wins} wins
-                    </span>
+                    <span className="text-[#6b6b88] ml-2">P{bestSeason.DriverStandings[0]?.position} · {bestSeason.DriverStandings[0]?.points} pts · {bestSeason.DriverStandings[0]?.wins} wins</span>
                   </div>
                 </div>
               )}
 
-              {/* Championship badges */}
               {career.championships > 0 && (
-                <div
-                  className="flex flex-wrap gap-2 mb-4"
-                  style={{ animation: 'slideUp 0.4s ease-out 0.5s both' }}
-                >
+                <div className="flex flex-wrap gap-2 mb-4" style={{ animation: 'slideUp 0.4s ease-out 0.5s both' }}>
                   {sortedSeasons
                     .filter(s => s.DriverStandings[0]?.position === '1')
                     .map(s => (
@@ -242,13 +205,7 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                 </div>
               )}
 
-              {/* Season history */}
-              <h3
-                className="text-xs font-bold uppercase tracking-widest text-[#6b6b88] mb-3"
-                style={{ animation: 'slideUp 0.4s ease-out 0.55s both' }}
-              >
-                Season History
-              </h3>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[#6b6b88] mb-3" style={{ animation: 'slideUp 0.4s ease-out 0.55s both' }}>Season History</h3>
               <div className="space-y-2">
                 {sortedSeasons.slice(0, 25).map((s, i) => {
                   const sd = s.DriverStandings[0]
@@ -259,11 +216,7 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                   const tc = getTeamColor(conId)
                   const isChamp = pos === 1
                   return (
-                    <div
-                      key={s.season}
-                      className="flex items-center gap-3 py-1.5 group"
-                      style={{ animation: `slideUp 0.35s ease-out ${0.6 + i * 0.03}s both` }}
-                    >
+                    <div key={s.season} className="flex items-center gap-3 py-1.5 group" style={{ animation: `slideUp 0.35s ease-out ${0.6 + i * 0.03}s both` }}>
                       <div className="w-10 text-right text-xs font-bold text-[#6b6b88]">{s.season}</div>
                       <div
                         className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-transform group-hover:scale-110"
@@ -296,7 +249,7 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
               </div>
             </>
           ) : (
-            <div className="text-center py-8 text-[#6b6b88]">Failed to load career data</div>
+            <div className="text-center py-8 text-[#6b6b88]">Could not load career data</div>
           )}
         </div>
       </div>

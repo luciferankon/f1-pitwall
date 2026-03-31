@@ -20,8 +20,8 @@ function parseAnalysis(text: string): Record<string, string> | null {
     const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const nextEsc = next?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const pat = nextEsc
-      ? new RegExp(`${escaped}:\s*([\s\S]*?)(?=${nextEsc}:|$)`, 'i')
-      : new RegExp(`${escaped}:\s*([\s\S]*)`, 'i')
+      ? new RegExp(`${escaped}:\\s*([\\s\\S]*?)(?=${nextEsc}:|$)`, 'i')
+      : new RegExp(`${escaped}:\\s*([\\s\\S]*)`, 'i')
     const m = text.match(pat)
     if (m?.[1]?.trim()) result[key] = m[1].trim()
   })
@@ -91,7 +91,6 @@ export default function RaceModal({ season, round, onClose }: RaceModalProps) {
     setAiLoading(false)
   }, [race, results, round, season])
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -215,9 +214,15 @@ export default function RaceModal({ season, round, onClose }: RaceModalProps) {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <div className="text-sm font-mono text-[#f0f0f8]">
-                            {r.Time?.time ?? r.status}
+                            {pos === 1
+                              ? (r.Time?.time ?? r.status)
+                              : r.Time?.time
+                                ? `+${r.Time.time.replace(/^\+/, '')}`
+                                : r.status}
                           </div>
-                          <div className="text-[10px] text-[#6b6b88]">{r.points} pts</div>
+                          <div className="text-[10px] text-[#6b6b88]">
+                            {pos === 1 ? '🏁 Race time' : `${r.points} pts`}
+                          </div>
                         </div>
                         {r.FastestLap?.rank === '1' && (
                           <div className="text-xs px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded-lg border border-purple-500/30 font-bold">FL</div>

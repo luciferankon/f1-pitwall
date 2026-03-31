@@ -16,8 +16,8 @@ export function DriverStandings({ standings, onDriverClick }: DriverStandingsPro
   const maxPts = parseFloat(standings[0]?.points ?? '1')
 
   return (
-    <div className="space-y-2">
-      {standings.map(s => {
+    <div className="space-y-2 stagger-in">
+      {standings.map((s, idx) => {
         const color = getTeamColor(s.Constructors[0]?.constructorId ?? '')
         const driver = s.Driver
         const flag = COUNTRY_FLAGS[driver.nationality] ?? '🏁'
@@ -27,8 +27,8 @@ export function DriverStandings({ standings, onDriverClick }: DriverStandingsPro
           <div
             key={driver.driverId}
             onClick={() => onDriverClick(s)}
-            className="group flex items-center gap-4 p-4 rounded-xl border border-[#1e1e2e] hover:border-[#2e2e42] bg-[#0d0d14] hover:bg-[#13131e] transition-all cursor-pointer hover:shadow-lg"
-            style={{ '--team-color': color } as React.CSSProperties}
+            className="group flex items-center gap-4 p-4 rounded-xl border border-[#1e1e2e] hover:border-[#2e2e42] bg-[#0d0d14] hover:bg-[#13131e] transition-all cursor-pointer hover:shadow-lg hover:-translate-y-0.5"
+            style={{ '--team-color': color, animationDelay: `${idx * 0.04}s` } as React.CSSProperties}
           >
             <div className="w-8 text-center flex-shrink-0">
               {pos <= 3
@@ -99,11 +99,15 @@ export function ConstructorStandings({ standings }: ConstructorStandingsProps) {
   const max = parseFloat(standings[0]?.points ?? '1')
 
   return (
-    <div className="space-y-3">
-      {standings.map(s => {
+    <div className="space-y-3 stagger-in">
+      {standings.map((s, idx) => {
         const color = getTeamColor(s.Constructor.constructorId)
         return (
-          <div key={s.Constructor.constructorId} className="p-4 rounded-xl border border-[#1e1e2e] bg-[#0d0d14]">
+          <div
+            key={s.Constructor.constructorId}
+            className="p-4 rounded-xl border border-[#1e1e2e] bg-[#0d0d14] hover:border-[#2e2e42] hover:bg-[#13131e] transition-all hover:-translate-y-0.5"
+            style={{ animationDelay: `${idx * 0.04}s` }}
+          >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
                 <span className="text-sm font-bold text-[#6b6b88]">P{s.position}</span>

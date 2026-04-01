@@ -10,6 +10,15 @@ interface DriverComparisonProps {
 
 interface CompStat { label: string; a: number; b: number }
 
+function isValidCareer(d: any): boolean {
+  return d != null && typeof d.totalRaces === 'number'
+}
+
+function safeNum(v: any): number {
+  const n = typeof v === 'number' ? v : parseFloat(v)
+  return isNaN(n) ? 0 : n
+}
+
 export default function DriverComparison({ driverStandings }: DriverComparisonProps) {
   const [driverA, setDriverA] = useState<string>('')
   const [driverB, setDriverB] = useState<string>('')
@@ -31,11 +40,18 @@ export default function DriverComparison({ driverStandings }: DriverComparisonPr
     if (!driverA || !driverB) return
     let cancelled = false
     setLoading(true)
+    setStatsA(null)
+    setStatsB(null)
     Promise.all([
       fetch(`/api/driver-career?driverId=${driverA}`).then(r => r.json()),
       fetch(`/api/driver-career?driverId=${driverB}`).then(r => r.json()),
     ]).then(([a, b]) => {
-      if (!cancelled) { setStatsA(a); setStatsB(b) }
+      if (!cancelled) {
+        setStatsA(isValidCareer(a) ? a : null)
+        setStatsB(isValidCareer(b) ? b : null)
+      }
+    }).catch(() => {
+      if (!cancelled) { setStatsA(null); setStatsB(null) }
     }).finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [driverA, driverB])
@@ -43,14 +59,14 @@ export default function DriverComparison({ driverStandings }: DriverComparisonPr
   const colorA = getTeamColor(standingA?.Constructors[0]?.constructorId ?? '')
   const colorB = getTeamColor(standingB?.Constructors[0]?.constructorId ?? '')
 
-  const compStats: CompStat[] = statsA && statsB ? [
-    { label: 'Career Races', a: statsA.totalRaces, b: statsB.totalRaces },
-    { label: 'Wins', a: statsA.wins, b: statsB.wins },
-    { label: 'Podiums', a: statsA.podiums, b: statsB.podiums },
-    { label: 'Poles', a: statsA.poles, b: statsB.poles },
-    { label: 'Championships', a: statsA.championships, b: statsB.championships },
-    { label: 'Career Points', a: statsA.totalPoints, b: statsB.totalPoints },
-    { label: 'Season Points', a: parseFloat(standingA?.points ?? '0'), b: parseFloat(standingB?.points ?? '0') },
+  const compStats: CompStat[] = (statsA && statsB) ? [
+    { label: 'Career Races',    a: safeNum(statsA.totalRaces),    b: safeNum(statsB.totalRaces) },
+    { label: 'Wins',            a: safeNum(statsA.wins),           b: safeNum(statsB.wins) },
+    { label: 'Podiums',         a: safeNum(statsA.podiums),        b: safeNum(statsB.podiums) },
+    { label: 'Poles',           a: safeNum(statsA.poles),          b: safeNum(statsB.poles) },
+    { label: 'Championships',   a: safeNum(statsA.championships),  b: safeNum(statsB.championships) },
+    { label: 'Career Points',   a: safeNum(statsA.totalPoints),    b: safeNum(statsB.totalPoints) },
+    { label: 'Season Points',   a: safeNum(standingA?.points),     b: safeNum(standingB?.points) },
   ] : []
 
   return (
@@ -106,7 +122,9 @@ export default function DriverComparison({ driverStandings }: DriverComparisonPr
           })}
         </div>
       ) : (
-        <div className="text-center py-8 text-[#6b6b88] text-sm">Select two drivers to compare</div>
+        <div className="text-center py-8 text-[#6b6b88] text-sm">
+          {!loading && driverA && driverB ? 'Failed to load stats — retrying…' : 'Select two drivers to compare'}
+        </div>
       )}
     </div>
   )

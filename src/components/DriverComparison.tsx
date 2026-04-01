@@ -60,14 +60,15 @@ export default function DriverComparison({ driverStandings }: DriverComparisonPr
   const colorB = getTeamColor(standingB?.Constructors[0]?.constructorId ?? '')
 
   const compStats: CompStat[] = (statsA && statsB) ? [
-    { label: 'Career Races',    a: safeNum(statsA.totalRaces),    b: safeNum(statsB.totalRaces) },
-    { label: 'Wins',            a: safeNum(statsA.wins),           b: safeNum(statsB.wins) },
-    { label: 'Podiums',         a: safeNum(statsA.podiums),        b: safeNum(statsB.podiums) },
-    { label: 'Poles',           a: safeNum(statsA.poles),          b: safeNum(statsB.poles) },
-    { label: 'Championships',   a: safeNum(statsA.championships),  b: safeNum(statsB.championships) },
-    { label: 'Career Points',   a: safeNum(statsA.totalPoints),    b: safeNum(statsB.totalPoints) },
-    { label: 'Season Points',   a: safeNum(standingA?.points),     b: safeNum(standingB?.points) },
-  ] : []
+    { label: 'Career Races',  a: safeNum(statsA.totalRaces),   b: safeNum(statsB.totalRaces) },
+    { label: 'Wins',          a: safeNum(statsA.wins),          b: safeNum(statsB.wins) },
+    { label: 'Podiums',       a: safeNum(statsA.podiums),       b: safeNum(statsB.podiums) },
+    { label: 'Poles',         a: safeNum(statsA.poles),         b: safeNum(statsB.poles) },
+    { label: 'Championships', a: safeNum(statsA.championships), b: safeNum(statsB.championships) },
+    { label: 'Career Points', a: safeNum(statsA.totalPoints),   b: safeNum(statsB.totalPoints) },
+    { label: 'Season Points', a: safeNum(standingA?.points),    b: safeNum(standingB?.points) },
+  // hide rows where both values are -1 (unavailable)
+  ].filter(s => !(s.a === -1 && s.b === -1)) : []
 
   return (
     <div className="bg-[#0d0d14] rounded-2xl border border-[#1e1e2e] p-5" style={{ animation: 'slideUp 0.5s ease-out' }}>
@@ -97,17 +98,22 @@ export default function DriverComparison({ driverStandings }: DriverComparisonPr
       ) : compStats.length > 0 ? (
         <div className="space-y-3">
           {compStats.map((stat, i) => {
-            const max = Math.max(stat.a, stat.b, 1)
-            const pctA = (stat.a / max) * 100
-            const pctB = (stat.b / max) * 100
+            // Clamp to 0 so -1 (unavailable) doesn't break bar widths
+            const va = Math.max(0, stat.a)
+            const vb = Math.max(0, stat.b)
+            const max = Math.max(va, vb, 1)
+            const pctA = (va / max) * 100
+            const pctB = (vb / max) * 100
             const winnerA = stat.a > stat.b
             const winnerB = stat.b > stat.a
+            const displayA = stat.a < 0 ? '—' : stat.a.toLocaleString()
+            const displayB = stat.b < 0 ? '—' : stat.b.toLocaleString()
             return (
               <div key={stat.label} style={{ animation: `slideUp 0.4s ease-out ${i * 0.05}s both` }}>
                 <div className="flex justify-between items-center mb-1">
-                  <span className={`text-sm font-bold tabular-nums ${winnerA ? 'text-white' : 'text-[#6b6b88]'}`}>{stat.a.toLocaleString()}</span>
+                  <span className={`text-sm font-bold tabular-nums ${winnerA ? 'text-white' : 'text-[#6b6b88]'}`}>{displayA}</span>
                   <span className="text-[10px] text-[#6b6b88] uppercase tracking-widest font-bold">{stat.label}</span>
-                  <span className={`text-sm font-bold tabular-nums ${winnerB ? 'text-white' : 'text-[#6b6b88]'}`}>{stat.b.toLocaleString()}</span>
+                  <span className={`text-sm font-bold tabular-nums ${winnerB ? 'text-white' : 'text-[#6b6b88]'}`}>{displayB}</span>
                 </div>
                 <div className="flex gap-1 h-2">
                   <div className="flex-1 flex justify-end">
@@ -123,7 +129,7 @@ export default function DriverComparison({ driverStandings }: DriverComparisonPr
         </div>
       ) : (
         <div className="text-center py-8 text-[#6b6b88] text-sm">
-          {!loading && driverA && driverB ? 'Failed to load stats — retrying…' : 'Select two drivers to compare'}
+          {!loading && driverA && driverB ? 'Loading career stats…' : 'Select two drivers to compare'}
         </div>
       )}
     </div>

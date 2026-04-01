@@ -58,7 +58,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number | string; suf
 }
 
 export default function Home() {
-  const [season, setSeason] = useState(2024)
+  const [season, setSeason] = useState(new Date().getFullYear())
   const [driverStandings, setDriverStandings] = useState<DriverStanding[]>([])
   const [constructorStandings, setConstructorStandings] = useState<ConstructorStanding[]>([])
   const [races, setRaces] = useState<Race[]>([])

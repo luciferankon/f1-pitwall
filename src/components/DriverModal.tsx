@@ -24,7 +24,7 @@ function AnimatedNumber({ target, duration = 1000 }: { target: number; duration?
   const [current, setCurrent] = useState(0)
   const rafRef = useRef<number>(0)
   useEffect(() => {
-    if (target === 0) { setCurrent(0); return }
+    if (target <= 0) { setCurrent(Math.max(0, target)); return }
     const start = performance.now()
     function step(now: number) {
       const pct = Math.min((now - start) / duration, 1)
@@ -77,10 +77,11 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
     .filter((s) => (s.DriverStandings?.length ?? 0) > 0)
     .sort((a, b) => parseInt(b.season) - parseInt(a.season))
 
+  // Use points to find best season since position data is unavailable from results API
   const bestSeason = sortedSeasons.reduce((best, s) => {
-    const pos = parseInt(s.DriverStandings[0]?.position ?? '99')
-    const bestPos = parseInt(best?.DriverStandings[0]?.position ?? '99')
-    return pos < bestPos ? s : best
+    const pts = parseFloat(s.DriverStandings[0]?.points ?? '0')
+    const bestPts = parseFloat(best?.DriverStandings[0]?.points ?? '0')
+    return pts > bestPts ? s : best
   }, sortedSeasons[0])
 
   const maxPts = Math.max(...sortedSeasons.map(s => parseFloat(s.DriverStandings[0]?.points ?? '0')), 1)
@@ -91,7 +92,8 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
     { label: 'Podiums', value: career.podiums, icon: '🥇' },
     { label: 'Poles', value: career.poles, icon: '⚡' },
     ...(career.fastestLaps >= 0 ? [{ label: 'Fastest Laps', value: career.fastestLaps, icon: '🟣' }] : []),
-    { label: 'Championships', value: career.championships, icon: '👑' },
+    // championships is -1 when unavailable (Jolpica requires season_year for standings)
+    ...(career.championships >= 0 ? [{ label: 'Championships', value: career.championships, icon: '👑' }] : []),
   ] : []
 
   return (
@@ -142,18 +144,15 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
             </div>
           ) : career ? (
             <>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-5">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-5">
                 {stats.map((stat, idx) => (
                   <div key={stat.label}
                        className="bg-[#0d0d14] border border-[#1e1e2e] rounded-xl p-3 text-center card-lift"
                        style={{
                          animation: `slideUp 0.4s ease-out ${idx * 0.06}s both`,
-                         borderColor: stat.label === 'Championships' && career.championships > 0 ? colors.primary + '55' : undefined,
-                         background: stat.label === 'Championships' && career.championships > 0 ? colors.primary + '10' : undefined,
                        }}>
                     <div className="text-xs mb-1">{stat.icon}</div>
-                    <div className="text-xl font-extrabold leading-none tabular-nums"
-                         style={{ color: stat.label === 'Championships' && career.championships > 0 ? colors.primary : '#f0f0f8' }}>
+                    <div className="text-xl font-extrabold leading-none tabular-nums text-[#f0f0f8]">
                       {statsVisible ? <AnimatedNumber target={stat.value} duration={900 + idx * 80} /> : 0}
                     </div>
                     <div className="text-[8px] text-[#6b6b88] mt-1 uppercase tracking-wider">{stat.label}</div>
@@ -176,20 +175,8 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                   <span className="text-xl">⭐</span>
                   <div className="text-sm">
                     <span className="text-white font-bold">Best: {bestSeason.season}</span>
-                    <span className="text-[#6b6b88] ml-2">P{bestSeason.DriverStandings[0]?.position} · {bestSeason.DriverStandings[0]?.points} pts · {bestSeason.DriverStandings[0]?.wins} wins</span>
+                    <span className="text-[#6b6b88] ml-2">{bestSeason.DriverStandings[0]?.points} pts · {bestSeason.DriverStandings[0]?.wins} wins</span>
                   </div>
-                </div>
-              )}
-
-              {career.championships > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4" style={{ animation: 'slideUp 0.4s ease-out 0.5s both' }}>
-                  {sortedSeasons.filter(s => s.DriverStandings[0]?.position === '1').map(s => (
-                    <div key={s.season}
-                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-                         style={{ backgroundColor: colors.primary + '25', color: colors.primary, border: `1px solid ${colors.primary}50` }}>
-                      👑 {s.season} World Champion
-                    </div>
-                  ))}
                 </div>
               )}
 
@@ -198,17 +185,18 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                 {sortedSeasons.slice(0, 25).map((s, i) => {
                   const sd = s.DriverStandings[0]
                   if (!sd) return null
-                  const pos = parseInt(sd.position)
+                  const posStr = sd.position
+                  const pos = parseInt(posStr || '99')
                   const pts = parseFloat(sd.points)
                   const conId = sd.Constructors?.[0]?.constructorId ?? ''
                   const tc = getTeamColor(conId)
-                  const isChamp = pos === 1
+                  const isChamp = posStr === '1'
                   return (
                     <div key={s.season} className="flex items-center gap-3 py-1.5 group" style={{ animation: `slideUp 0.35s ease-out ${0.6 + i * 0.03}s both` }}>
                       <div className="w-10 text-right text-xs font-bold text-[#6b6b88]">{s.season}</div>
                       <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 transition-transform group-hover:scale-110"
                            style={{ backgroundColor: isChamp ? colors.primary : '#1e1e2e', color: isChamp ? colors.text : '#f0f0f8', boxShadow: isChamp ? `0 0 12px ${colors.primary}66` : 'none' }}>
-                        {isChamp ? '👑' : pos}
+                        {isChamp ? '👑' : (posStr ? pos : '—')}
                       </div>
                       <div className="flex-1">
                         <div className="h-2 bg-[#1e1e2e] rounded-full overflow-hidden">

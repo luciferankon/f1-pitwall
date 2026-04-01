@@ -7,7 +7,7 @@ interface SeasonSelectorProps {
 
 export default function SeasonSelector({ season, onChange }: SeasonSelectorProps) {
   const years: number[] = []
-  for (let y = 2024; y >= 1950; y--) years.push(y)
+  for (let y = new Date().getFullYear(); y >= 1950; y--) years.push(y)
 
   return (
     <div className="flex items-center gap-2">

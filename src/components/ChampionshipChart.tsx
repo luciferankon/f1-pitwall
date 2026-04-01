@@ -60,11 +60,41 @@ export default function ChampionshipChart({ season, driverStandings }: Champions
     async function load() {
       setLoading(true)
       try {
-        const res = await fetch(`https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=600`)
-        if (!res.ok) throw new Error('fetch failed')
-        const data = await res.json()
-        const races = data?.MRData?.RaceTable?.Races ?? []
+        // Step 1: get total result count so we know how many pages to fetch
+        const metaRes = await fetch(
+          `https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=1`
+        )
+        if (!metaRes.ok) throw new Error('meta failed')
+        const meta = await metaRes.json()
+        const total = parseInt(meta?.MRData?.total ?? '0') || 0
+        const pageCount = Math.max(1, Math.ceil(total / 100))
 
+        // Step 2: fetch all pages in parallel (Jolpica caps at 100/page)
+        const pages = await Promise.all(
+          Array.from({ length: pageCount }, (_, i) =>
+            fetch(
+              `https://api.jolpi.ca/ergast/f1/${season}/results.json?limit=100&offset=${i * 100}`
+            )
+              .then(r => (r.ok ? r.json() : null))
+              .then((d: any) => (d?.MRData?.RaceTable?.Races ?? []) as any[])
+              .catch(() => [] as any[])
+          )
+        )
+
+        // Step 3: merge races — pagination can split a race across page boundaries
+        const raceMap = new Map<string, any>()
+        for (const page of pages) {
+          for (const race of page) {
+            if (!raceMap.has(race.round)) {
+              raceMap.set(race.round, { ...race, Results: [] })
+            }
+            raceMap.get(race.round)!.Results.push(...(race.Results ?? []))
+          }
+        }
+        const races = Array.from(raceMap.values())
+          .sort((a, b) => parseInt(a.round) - parseInt(b.round))
+
+        // Step 4: build cumulative points per driver per round
         const cumulative = new Map<string, number>()
         for (const [id] of driverInfo) cumulative.set(id, 0)
 
@@ -75,8 +105,7 @@ export default function ChampionshipChart({ season, driverStandings }: Champions
             const id = result.Driver?.driverId
             if (driverInfo.has(id)) {
               const prev = cumulative.get(id) ?? 0
-              const pts = prev + (parseFloat(result.points) || 0)
-              cumulative.set(id, pts)
+              cumulative.set(id, prev + (parseFloat(result.points) || 0))
             }
           }
           for (const [id] of driverInfo) {

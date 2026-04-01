@@ -77,8 +77,13 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
     .filter((s) => (s.DriverStandings?.length ?? 0) > 0)
     .sort((a, b) => parseInt(b.season) - parseInt(a.season))
 
-  // Use points to find best season since position data is unavailable from results API
+  // Best season: lowest final standing position, tiebreak by most points
   const bestSeason = sortedSeasons.reduce((best, s) => {
+    const posStr = s.DriverStandings[0]?.position
+    const bestPosStr = best?.DriverStandings[0]?.position
+    const pos = parseInt(posStr || '999')
+    const bestPos = parseInt(bestPosStr || '999')
+    if (pos !== bestPos) return pos < bestPos ? s : best
     const pts = parseFloat(s.DriverStandings[0]?.points ?? '0')
     const bestPts = parseFloat(best?.DriverStandings[0]?.points ?? '0')
     return pts > bestPts ? s : best
@@ -87,13 +92,12 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
   const maxPts = Math.max(...sortedSeasons.map(s => parseFloat(s.DriverStandings[0]?.points ?? '0')), 1)
 
   const stats = career ? [
-    { label: 'Races', value: career.totalRaces, icon: '🏁' },
-    { label: 'Wins', value: career.wins, icon: '🏆' },
-    { label: 'Podiums', value: career.podiums, icon: '🥇' },
-    { label: 'Poles', value: career.poles, icon: '⚡' },
-    ...(career.fastestLaps >= 0 ? [{ label: 'Fastest Laps', value: career.fastestLaps, icon: '🟣' }] : []),
-    // championships is -1 when unavailable (Jolpica requires season_year for standings)
-    ...(career.championships >= 0 ? [{ label: 'Championships', value: career.championships, icon: '👑' }] : []),
+    { label: 'Races',     value: career.totalRaces,   icon: '🏁' },
+    { label: 'Wins',      value: career.wins,          icon: '🏆' },
+    { label: 'Podiums',   value: career.podiums,       icon: '🥇' },
+    { label: 'Poles',     value: career.poles,         icon: '⚡' },
+    { label: 'Fastest Laps', value: career.fastestLaps, icon: '🟣' },
+    { label: 'Championships', value: career.championships, icon: '👑' },
   ] : []
 
   return (
@@ -144,15 +148,18 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
             </div>
           ) : career ? (
             <>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-5">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-5">
                 {stats.map((stat, idx) => (
                   <div key={stat.label}
                        className="bg-[#0d0d14] border border-[#1e1e2e] rounded-xl p-3 text-center card-lift"
                        style={{
                          animation: `slideUp 0.4s ease-out ${idx * 0.06}s both`,
+                         borderColor: stat.label === 'Championships' && career.championships > 0 ? colors.primary + '55' : undefined,
+                         background: stat.label === 'Championships' && career.championships > 0 ? colors.primary + '10' : undefined,
                        }}>
                     <div className="text-xs mb-1">{stat.icon}</div>
-                    <div className="text-xl font-extrabold leading-none tabular-nums text-[#f0f0f8]">
+                    <div className="text-xl font-extrabold leading-none tabular-nums"
+                         style={{ color: stat.label === 'Championships' && career.championships > 0 ? colors.primary : '#f0f0f8' }}>
                       {statsVisible ? <AnimatedNumber target={stat.value} duration={900 + idx * 80} /> : 0}
                     </div>
                     <div className="text-[8px] text-[#6b6b88] mt-1 uppercase tracking-wider">{stat.label}</div>
@@ -175,8 +182,23 @@ export default function DriverModal({ standing, onClose }: DriverModalProps) {
                   <span className="text-xl">⭐</span>
                   <div className="text-sm">
                     <span className="text-white font-bold">Best: {bestSeason.season}</span>
-                    <span className="text-[#6b6b88] ml-2">{bestSeason.DriverStandings[0]?.points} pts · {bestSeason.DriverStandings[0]?.wins} wins</span>
+                    <span className="text-[#6b6b88] ml-2">
+                      {bestSeason.DriverStandings[0]?.position ? `P${bestSeason.DriverStandings[0].position} · ` : ''}
+                      {bestSeason.DriverStandings[0]?.points} pts · {bestSeason.DriverStandings[0]?.wins} wins
+                    </span>
                   </div>
+                </div>
+              )}
+
+              {career.championships > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4" style={{ animation: 'slideUp 0.4s ease-out 0.5s both' }}>
+                  {sortedSeasons.filter(s => s.DriverStandings[0]?.position === '1').map(s => (
+                    <div key={s.season}
+                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
+                         style={{ backgroundColor: colors.primary + '25', color: colors.primary, border: `1px solid ${colors.primary}50` }}>
+                      👑 {s.season} World Champion
+                    </div>
+                  ))}
                 </div>
               )}
 

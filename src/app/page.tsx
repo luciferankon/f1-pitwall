@@ -23,18 +23,19 @@ const HERO_COLORS: Record<string, string> = {
   haas: '#B6BABD', rb: '#6692FF', williams: '#64C4FF', kick_sauber: '#52E252',
 }
 
-function useScrollReveal() {
+// Re-runs when `dep` changes so newly-rendered .reveal elements get observed
+function useScrollReveal(dep?: unknown) {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const el = ref.current
     if (!el) return
     const observer = new IntersectionObserver(
       entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') }),
-      { threshold: 0.1 }
+      { threshold: 0.08 }
     )
     el.querySelectorAll('.reveal').forEach(c => observer.observe(c))
     return () => observer.disconnect()
-  }, [])
+  }, [dep])
   return ref
 }
 
@@ -65,7 +66,9 @@ export default function Home() {
   const [selectedRace, setSelectedRace] = useState<number | null>(null)
   const [selectedDriver, setSelectedDriver] = useState<DriverStanding | null>(null)
   const [heroColor, setHeroColor] = useState('#E8002D')
-  const scrollRef = useScrollReveal()
+
+  // Pass `loading` so the observer re-runs once data renders
+  const scrollRef = useScrollReveal(loading)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
